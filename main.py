@@ -5,6 +5,7 @@ from ultralytics import YOLO
 from libcamera import Transform
 import time
 import numpy as np
+from depthest import init, estimate
 print("init")
 
 # Initialize the Picamera2
@@ -23,7 +24,7 @@ picam2.start()
 
 # Load the YOLO11 model
 # have to run create model first 
-model = YOLO("yolo11n_ncnn_model", task="detect")
+model = YOLO("yolo11n_ncnn_model", task="detect", )
 
 instantBreak = False
 
@@ -40,6 +41,7 @@ bottleFrameDetected = None
 bottleFrameNew = None
 
 results = None
+bottleBox = None
 
 while True:
     # time when we finish processing for this frame 
@@ -73,6 +75,7 @@ while True:
             # break;
         for detection in result.boxes:
         #     # Assuming detection.cls is an integer index for the class
+            bottleBox = detection
             if detection.cls == 39:  # correct class index for "bottle"
                 print("Bottle recognized", )
                 print("Probabilty", detection.conf)
@@ -113,5 +116,5 @@ for result in results:
     result.show()  # display to screen
     result.save(filename="output/bottle_detected.png")  # save to disk
 
-
-# 
+init()
+estimate(bottleFrameDetected, bottleBox)

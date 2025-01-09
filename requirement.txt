@@ -4,3 +4,4 @@ opencv-python
 ipywidgets
 pillow
 requests
+transformers
