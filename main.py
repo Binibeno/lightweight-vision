@@ -23,7 +23,7 @@ picam2.start()
 
 # Load the YOLO11 model
 # have to run create model first 
-model = YOLO("yolo11n_ncnn_model")
+model = YOLO("yolo11n_ncnn_model", task="detect")
 
 instantBreak = False
 
@@ -46,9 +46,6 @@ while True:
     # ! do all processing below this, and above the fps calculator
     new_frame_time = time.time() 
 
-    if instantBreak:
-        break
-
     # Capture frame-by-frame
     frame = picam2.capture_array()
 
@@ -56,7 +53,7 @@ while True:
     results = model(frame)
 
     # Visualize the results on the frame
-    annotated_frame = results[0].plot()
+    # annotated_frame = results[0].plot()
 
     new_frame_time = time.time() 
   
@@ -69,10 +66,16 @@ while True:
     print(fps)
     # Check if a bottle has been recognized
     for result in results:
+        # probs = result.probs  # Probs object for classification outputs
+        # print(probs)
+        # if probs != None:
+            # print("Probs", probs)
+            # break;
         for detection in result.boxes:
-            # Assuming detection.cls is an integer index for the class
-            if detection.cls == 0:  # Replace 0 with the correct class index for "bottle"
-                print("Bottle recognized")
+        #     # Assuming detection.cls is an integer index for the class
+            if detection.cls == 39:  # correct class index for "bottle"
+                print("Bottle recognized", )
+                print("Probabilty", detection.conf)
                 bottleFrameDetected = frame
                 instantBreak = True
                 break
@@ -80,6 +83,9 @@ while True:
 
     # Display the resulting frame
     # cv2.imshow("Camera", annotated_frame)
+
+    if instantBreak:
+        break
 
     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) == ord("q"):
@@ -92,13 +98,12 @@ cv2.destroyAllWindows()
 # https://docs.ultralytics.com/modes/predict/#__tabbed_1_1
 if bottleFrameDetected is not None:
     # Capture a new frame of the bottle
+    # should not be blurry
     bottleFrameNew = picam2.capture_array()
-
-    # Save both frames as PNGs
-    cv2.imwrite("/home/admin/code/cv/bottle_detected.png", bottleFrameDetected)
-    cv2.imwrite("/home/admin/code/cv/bottle_new.png", bottleFrameNew)
+    cv2.imwrite("output/bottle_new.png", bottleFrameNew)
 
 # Process results list
+# results for bottleFrameDetected
 for result in results:
     boxes = result.boxes  # Boxes object for bounding box outputs
     masks = result.masks  # Masks object for segmentation masks outputs
@@ -106,4 +111,7 @@ for result in results:
     probs = result.probs  # Probs object for classification outputs
     obb = result.obb  # Oriented boxes object for OBB outputs
     result.show()  # display to screen
-    result.save(filename="result.jpg")  # save to disk
+    result.save(filename="output/bottle_detected.png")  # save to disk
+
+
+# 

@@ -1,3 +1,6 @@
 numpy-1.26.4
 ultralytics[export]
 opencv-python
+ipywidgets
+pillow
+requests
