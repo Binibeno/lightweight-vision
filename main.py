@@ -4,7 +4,7 @@ from picamera2 import Picamera2
 from ultralytics import YOLO
 from libcamera import Transform
 import time
-
+import numpy as np
 from depthest import init, estimate
 print("init")
 
@@ -24,8 +24,7 @@ picam2.start()
 
 # Load the YOLO11 model
 # have to run create model first 
-segmentModel = YOLO("yolo11n-seg.pt")  
-model = YOLO("yolo11n-cls.pt")
+model = YOLO("yolo11n_ncnn_model", task="detect", )
 
 instantBreak = False
 
@@ -55,7 +54,6 @@ while True:
     # Run YOLO11 inference on the frame
     results = model(frame)
 
-    # print(results)
     # Visualize the results on the frame
     # annotated_frame = results[0].plot()
 
@@ -72,28 +70,18 @@ while True:
     for result in results:
         # probs = result.probs  # Probs object for classification outputs
         # print(probs)
-        # classification model
-        if result.probs != None:
-            # print("Top 5 classes", result.probs.top5)
-            # https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
-            # 440: beer_bottle
-            # 898: water bottle
-            if 898 in result.probs.top5:
-                print("Bottle found with class index 898")
+        # if probs != None:
+            # print("Probs", probs)
+            # break;
+        for detection in result.boxes:
+        #     # Assuming detection.cls is an integer index for the class
+            bottleBox = detection
+            if detection.cls == 39:  # correct class index for "bottle"
+                print("Bottle recognized", )
+                print("Probabilty", detection.conf)
                 bottleFrameDetected = frame
                 instantBreak = True
-                break;
-
-
-        # for detection in result.boxes:
-        # #     # Assuming detection.cls is an integer index for the class
-        #     bottleBox = detection
-        #     if detection.cls == 39:  # correct class index for "bottle"
-        #         print("Bottle recognized", )
-        #         print("Probabilty", detection.conf)
-        #         bottleFrameDetected = frame
-        #         instantBreak = True
-        #         break
+                break
 
 
     # Display the resulting frame
@@ -101,6 +89,7 @@ while True:
 
     if instantBreak:
         break
+
     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) == ord("q"):
         print("")
@@ -124,24 +113,8 @@ for result in results:
     keypoints = result.keypoints  # Keypoints object for pose outputs
     probs = result.probs  # Probs object for classification outputs
     obb = result.obb  # Oriented boxes object for OBB outputs
-    # result.show()  # display to screen
+    result.show()  # display to screen
     result.save(filename="output/bottle_detected.png")  # save to disk
 
-# segmnet
-segmentResults = segmentModel.predict(source=bottleFrameDetected, classes=39)
-bottleMask = None
-# Process results list
-for result in segmentResults:
-    result.save(filename="output/segmented.jpg")  # save to disk
-
-    if (result.masks.shape[0] > 1) :
-        print("Error! More than one bottle detected. Using the first one.")
-        print("Error! More than one bottle detected. Using the first one.")
-        print("Error! More than one bottle detected. Using the first one.")
-
-    bottleMask = result.masks[0]  # Masks object for segmentation masks outputs
-
-
-
 init()
-estimate(bottleFrameDetected, bottleBox, bottleMask)
+estimate(bottleFrameDetected, bottleBox)

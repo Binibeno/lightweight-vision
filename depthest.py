@@ -16,9 +16,10 @@ def estimate(picam_array, bottleBox, masks):
     depth.save("output/depth_estimation.png")
 
     # calculate the depth of the bottle
-    # calculate average depth of pixels inside bounding box
-    x1, y1, x2, y2 = bottleBox.xyxy.cpu().numpy()[0]
-    bottle_depth = np.array(depth)[int(y1):int(y2), int(x1):int(x2)]
+    # calculate average depth of pixels inside mask
+    depth_array = np.array(depth)
+    mask_array = masks.data.cpu().numpy().squeeze().astype(bool)
+    bottle_depth = depth_array[mask_array]
     average_depth = np.mean(bottle_depth)
     print(f"Average depth of the bottle: {average_depth}")
 
