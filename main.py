@@ -89,7 +89,6 @@ while True:
 
     if instantBreak:
         break
-
     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) == ord("q"):
         print("")
