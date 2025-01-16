@@ -4,7 +4,7 @@ from picamera2 import Picamera2
 from ultralytics import YOLO
 from libcamera import Transform
 import time
-import numpy as np
+
 from depthest import init, estimate
 print("init")
 
@@ -24,7 +24,7 @@ picam2.start()
 
 # Load the YOLO11 model
 # have to run create model first 
-# model = YOLO("yolo11n-cls_ncnn_model" )
+segmentModel = YOLO("yolo11n-seg.pt")  
 model = YOLO("yolo11n-cls.pt")
 
 instantBreak = False
@@ -121,8 +121,24 @@ for result in results:
     keypoints = result.keypoints  # Keypoints object for pose outputs
     probs = result.probs  # Probs object for classification outputs
     obb = result.obb  # Oriented boxes object for OBB outputs
-    result.show()  # display to screen
+    # result.show()  # display to screen
     result.save(filename="output/bottle_detected.png")  # save to disk
 
+# segmnet
+segmentResults = segmentModel.predict(source=bottleFrameDetected, classes=39)
+bottleMask = None
+# Process results list
+for result in segmentResults:
+    result.save(filename="output/segmented.jpg")  # save to disk
+
+    if (result.masks.shape[0] > 1) :
+        print("Error! More than one bottle detected. Using the first one.")
+        print("Error! More than one bottle detected. Using the first one.")
+        print("Error! More than one bottle detected. Using the first one.")
+
+    bottleMask = result.masks[0]  # Masks object for segmentation masks outputs
+
+
+
 init()
-estimate(bottleFrameDetected, bottleBox)
+estimate(bottleFrameDetected, bottleBox, bottleMask)

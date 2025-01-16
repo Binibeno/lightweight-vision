@@ -9,7 +9,7 @@ def init():
     pipe = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Small-hf")
     print("depth est. init")
 
-def estimate(picam_array, bottleBox):
+def estimate(picam_array, bottleBox, masks):
     pi_image = Image.fromarray(picam_array)
     # inference
     depth = pipe(pi_image)["depth"]
