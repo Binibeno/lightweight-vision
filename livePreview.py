@@ -12,6 +12,7 @@ picam2 = Picamera2()
 # picam2.preview_configuration.main.size = (1280, 720)
 picam2.preview_configuration.main.size = (640, 310)
 
+
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
 picam2.preview_configuration.transform=Transform(vflip=1)
